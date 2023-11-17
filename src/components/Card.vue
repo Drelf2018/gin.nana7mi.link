@@ -1,69 +1,90 @@
 <template>
-  <div style="font-size: 50px;">
-    <a :href="card.cover_href" target="_blank"><img class="cover" :src="card.cover_url"></a>
-    <div v-if="card.cover_href" class="linear"></div>
-    <div class="show">
-      <Face :face="card" style="margin: 0.24em;" />
-      <span>  
-        <div :class="{cmt: card.subtitle == null}">
-          <span :style="{color: card.title_color}">{{ card.title }}</span>
-          <slot></slot>
-        </div>
-        <p>{{ card.subtitle }}</p>
-      </span>
+  <div class="card" :mode="mode" :link="cover.link != ''" :style="{borderRadius: border, '--r': radius}">
+    <a v-if="cover.link" :href="cover.url" target="_blank">
+      <img class="cover" :src="cover.link">
+      <div id="shadow"></div>
+    </a>
+    <div id="content">
+      <slot></slot>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { PropType } from 'vue'
-import { userInfo } from './tool'
+import { Attachment } from "./api";
 
-import Face from './Face.vue'
-
-defineProps({ card: Object as PropType<userInfo> })
+defineProps({ 
+  mode: String,
+  border: String,
+  radius: String,
+  cover: {
+    type: Object as PropType<Attachment>,
+    default: { link: "" },
+  },
+})
 </script>
 
 <style lang="scss" scoped>
-.cover {
-  width: 100%;
-  border-radius: 5px 5px 0 0;
-  display: block;
-}
-
-.linear {
+.card {
   position: relative;
-  height: 20px;
-  z-index: 2;
-  margin-top: -20px;
+  margin: 8px 4px;
+  padding: 0;
+  transition: all 0.2s;
+  overflow: hidden;
 
   @include themeify{
-    background-image: themed('linear');
+    opacity: themed('fill');
+    color: themed('shadow-container-color');
+    background-color: themed('shadow-container-back');
+    box-shadow: themed('shadow-container-box');
+  }
+
+  &[mode=mask][link=false] {
+    border-top-left-radius: var(--r) !important;
+    border-top-right-radius: var(--r) !important;
+  }
+
+  #content {
+    background-color: inherit;
+  }
+  
+  &[mode=mask] #content {
+    border-top-left-radius: var(--r);
+    border-top-right-radius: var(--r);
+    overflow: hidden;
+  }
+
+  &[mode=mask][link=true] #content {
+    position: relative;
+    margin-top: calc(-1*var(--r));
+  }
+
+  a {
+    color: #eb7350;
+  }
+
+  .cover {
+    width: 100%;
+    display: block;
+  }
+
+  &[mode=shadow] #shadow {
+    position: absolute;
+    width: 100%;
+    height: 20px;
+    z-index: 2;
+    transform: translateY(-19px);
+
+    @include themeify{
+      background-image: themed('linear');
+    }
   }
 }
 
-.show {
-  display: flex;
-  align-items: center;
-  z-index: 2;
-  position: relative;
-
-  div {
-    font-size: 0.48em;
-  }
-
-  p {
-    font-size: 0.28em;
-    margin: 0;
-    color: grey;
-  }
-}
-
-.pc .cmt {
-  font-size: 0.43em !important;
-}
-
-.mobile .cmt {
-  font-size: 0.5em !important;
+#app[data-theme=light] .card {
+  box-shadow: 0 3px 1px -2px rgb(0 0 0 / 12%),
+              0 2px 2px 0 rgb(0 0 0 / 14%),
+              0 1px 5px 0 rgb(0 0 0 / 20%);
 }
 </style>

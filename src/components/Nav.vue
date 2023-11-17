@@ -7,27 +7,34 @@
         <ion-icon v-else name="moon"></ion-icon>
       </div>
       <input v-model="search" type="text" placeholder="支持模糊搜索动态" @input="e => emit('search', search)">
-      <Face id="face" :login="face.face_href != ''" :face="face" style="font-size: 34px" />
-      <div id="info" class="shadow-container" @mouseenter="info" @mouseleave="info">
-        <slot v-if="theme.isPC"></slot>
+      <Face id="face" :login="blogger.uid != ''" :blogger="blogger" style="font-size: 34px" />
+      <div id="info" @mouseenter="info" @mouseleave="info">
+        <Card v-if="theme.isPC" mode="shadow" border="16px" radius="16px" :cover="blogger.photo">
+          <div style="padding: 8px;">
+            <slot v-if="blogger.uid" name="login"></slot>
+            <slot v-else name="logout"></slot>
+          </div>
+        </Card>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, PropType, onMounted } from 'vue'
-import { Theme, faceInfo } from './tool'
+import { ref, PropType, onMounted, computed } from 'vue'
+import { Theme } from './tool'
+import { Attachment, Blogger } from './api'
 
-import Face from './Face.vue'
+import Card from './Card.vue'
+import vueConfig from 'vue.config'
 
 const emit = defineEmits(['search'])
 
-defineProps({
+const props = defineProps({
   src: String,
   height: String,
   isCovered: Boolean,
-  face: Object as PropType<faceInfo>,
+  blogger: Object as PropType<Blogger>,
   theme: Object as PropType<Theme>
 })
 
@@ -65,11 +72,10 @@ onMounted(() => {
   transition: all 0.35s ease 0.25s;
   z-index: 105;
   overflow: hidden;
-  padding: 16px;
 }
 
 .show-info {
-  top: 64px !important;
+  top: 72px !important;
   opacity: 1 !important;
   transition: all 0.25s !important;
 }
@@ -79,7 +85,7 @@ onMounted(() => {
   transition: all 0.35s ease 0.25s;
 
   &:hover + #info {
-    top: 64px;
+    top: 72px;
     opacity: 1;
     transition: all 0.25s;
   }
@@ -169,6 +175,8 @@ onMounted(() => {
     background-image: none !important;
   }
 
+  position: relative;
+  z-index: -2;
   top: 0;
   width: 100%;
   height: var(--height);

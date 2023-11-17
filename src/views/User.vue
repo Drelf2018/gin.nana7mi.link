@@ -50,7 +50,7 @@ import Code from '../components/Code.vue'
 import Post from '../components/Post.vue'
 import { ArrowLeft } from '@element-plus/icons-vue'
 import { Theme, Format } from '../components/tool'
-import { get_posts } from '../components/api'
+import { posts } from '../components/api'
 import jsYaml from 'js-yaml'
 
 import { ref } from 'vue'
@@ -103,7 +103,7 @@ const PastPosts = ref([])
 // 获取一定数量的初始博文
 GetPastPost()
 async function GetPastPost() {
-  let res = await get_posts(1676917807, 1676919151)
+  let res = await posts(1676917807, 1676919151)
   if (res.data.code == 0) {
     if (res.data.data.length != 0) {
       let tp = res.data.data.reverse()

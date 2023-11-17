@@ -1,82 +1,47 @@
 <template>
-  <div class="shadow-container">
-    <a :href="post.url" style="color: inherit" target="_blank"><ion-icon name="arrow-redo-outline" class="goto"></ion-icon></a>
-    <ion-icon name="alert-circle-outline" class="goto" @click="() => NoticePost(post)"></ion-icon>
-    <Card :card="post.card" style="margin: -9px"></Card>
-    <p v-html="post.text"></p>
-    <img :src="src" v-for="src in post.picUrls" :style="{width: imgWidth}">
-    <Post v-if="post.repost && post.repost.mid != ''" :key="post.repost.key" :opost="post.repost" />
-    <p class="date" :style="[post.comments.length != 0 ? '' : 'margin-bottom: 0']">{{ post.date }} {{ post.source }}</p>
-    <Comments 
-      :key="com.mid"
-      :comment="com"
-      :reply="false"
-      :last="i == post.comments.length-1"
-      v-for="com, i in post.comments"
-    />
-  </div>
+  <Card mode="mask" border="16px" radius="16px">
+    <a :href="post.get_post_url()" style="color: inherit" target="_blank"><ion-icon name="arrow-redo-outline" class="goto"></ion-icon></a>
+    <ion-icon name="alert-circle-outline" class="goto" @click="post.notice"></ion-icon>
+    <Profile :blogger="post.blogger"></Profile>
+    <p class="text" v-html="post.text"></p>
+    <div :style="{'padding': '0px 8px', '--len': Math.min(post.attachments.length, 3)}">
+      <img class="attachments" :src="a.link" v-for="a in post.attachments">
+    </div>
+    <Post v-if="post.repost" :post="post.repost" style="margin: 8px;" />
+    <p class="date">{{ post.get_format_time() }} 来自 {{ post.source }}</p>
+    <!-- :style="[post.comments.length != 0 ? '' : 'margin-bottom: 0']"
+      <Comments 
+        :key="com.mid"
+        :comment="com"
+        :reply="false"
+        :last="i == post.comments.length-1"
+        v-for="com, i in post.comments"
+      />
+    -->
+  </Card>
 </template>
 
 <script setup lang="ts">
-import { NoticePost, Format } from './tool';
-import { ref, onMounted } from 'vue';
+import { PostModel } from "./api";
+import { PropType } from 'vue';
 import Card from './Card.vue'
 import Comments from './Comments.vue'
 
-const props = defineProps({ opost: Object })
-const post = ref(handler(props.opost))
-const imgWidth = ref("100%")
+// defineProps({ post: Object as PropType<PostModel> })
+const props = defineProps({ post: Object as PropType<PostModel> })
+handler(props.post)
 
-onMounted(() => {
-  imgWidth.value = 100 / Math.ceil(Math.sqrt(post.value.picUrls.length)) + "%"
-})
-
-function handler(post) {
-  post.face = replaceUrl(post.face)
-  post.pendant = replaceUrl(post.pendant)
-  post.picUrls = replaceUrls(post.picUrls)
-  post.date = Format(new Date(post.time * 1000), "yy-MM-dd hh:mm:ss")
-  post.card = {
-    cover_href: null,
-    cover_url: null,
-    face_href: "",
-    face_url: post.face,
-    pendant: post.pendant,
-    pendant_color: "",
-    title: post.name,
-    title_color: "#eb7350",
-    subtitle: null
-  }
-  switch (post.type) {
-    case "weibo":
-      post.card.face_href = `https://weibo.com/u/${post.uid}`
-      post.card.pendant_color = "#eb7350"
-      post.card.subtitle = post.description
-      post.url = `https://weibo.com/${post.uid}/${post.mid}`
-      if(post.repost) post.repost = handler(post.repost)   
-      break
-    case "weiboComment":
-      post.card.face_href = `https://weibo.com/u/${post.uid}`
-      post.card.pendant_color = "transparent"
-      break
-  }
-  if(post.comments == null) post.comments = []
-  if(post.comments.length != 0) post.comments = post.comments.map(handler)
-  return post
+function handler(post: PostModel) {
+  post.blogger.face.link = replaceUrl(post.blogger.face.link)
+  post.blogger.pendant.link = replaceUrl(post.blogger.pendant.link)
+  post.attachments.forEach(a => {
+    a.link = replaceUrl(a.link)  
+  })
 }
 
 function replaceUrl(url: string) {
-  // TODO
-  return url
-  // if (url != "") {
-  //   return ApiUrl + "/url/" + url
-  // }
-  // return ""
-}
-
-function replaceUrls(urls: [string]) {
-  if (urls) return urls.map(replaceUrl)
-  return []
+  if(url == "") return ""
+  return "https://gin.nana7mi.link" + url
 }
 </script>
 
@@ -109,9 +74,21 @@ function replaceUrls(urls: [string]) {
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
+.text {
+  margin: 0 8px;
+}
+
+.attachments {
+  width: calc(100% / var(--len) - 2px);
+  margin: 1px 2px 1px 0;
+  vertical-align: middle;
+}
+
 .date {
   color: grey;
   text-align: right;
   font-size: 12px;
+  // margin-top: 8px;
+  margin-right: 16px;
 }
 </style>

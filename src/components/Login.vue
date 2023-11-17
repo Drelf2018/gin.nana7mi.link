@@ -56,8 +56,8 @@ function getToken() {
       token.value = data.token
       if (plan) clearInterval(plan)
       plan = setInterval(async () => {
-        let data = await get_dynamic_comments("643451139714449427")
-        data.filter(r => r.member.mid == uid.value).forEach(r => {
+        let comments = await get_dynamic_comments(data.oid)
+        comments.filter(r => r.member.mid == uid.value).forEach(r => {
           if (r.content.message == token.value) {
             canLogin.value = true
             clearInterval(plan)
@@ -73,7 +73,6 @@ function login() {
   if (!canLogin.value) return
   register(auth).then(
     data => {
-      localStorage.setItem("uid", uid.value)
       localStorage.setItem("token", data)
       location.reload()
     }

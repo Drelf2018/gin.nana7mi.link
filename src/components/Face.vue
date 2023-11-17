@@ -1,8 +1,8 @@
 <template>
-  <a v-if="face.face_href" :href="face.face_href" target="_blank">
+  <a v-if="blogger.face.link" :href="blogger.get_face_href()" target="_blank">
     <div class="face">
-      <img id="pendant" :src="face.pendant">
-      <img id="profile" :src="face.face_url" :url="face.pendant != ''" :style="`border-color: ${face.pendant_color}`">
+      <img id="pendant" :src="blogger.pendant.link">
+      <img id="profile" :src="blogger.face.link" :url="blogger.pendant.link != ''" :style="{borderColor: blogger.get_pendant_color()}">
     </div>
   </a>
   <a v-else href="javascript:;" class="login" @click="login"><div>登录</div></a>
@@ -10,9 +10,10 @@
 
 <script setup lang="ts">
 import { PropType } from 'vue'
-import { faceInfo } from './tool'
+import { Blogger } from './api'
 
-defineProps({ face: Object as PropType<faceInfo> })
+const props = defineProps({ blogger: Object as PropType<Blogger> })
+
 
 function login() {
   let form = document.getElementById("hidden-login-form")
@@ -33,7 +34,7 @@ function login() {
   #pendant {
     // --alpha: 1.6;
     // height: calc(var(--size) * var(--alpha));
-    height: 1.6em;
+    height: 1.75em;
     position: relative;
     top: 50%;
     left: 50%;

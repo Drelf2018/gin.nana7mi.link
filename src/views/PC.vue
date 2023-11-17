@@ -5,10 +5,10 @@
         <template #left>
           <StickyArea>
             <template #normal>
-              <iPhone ref="Phone" />
+              <!-- <iPhone ref="Phone" /> -->
             </template>
             <template #sticky>
-              <div class="fill shadow-container">
+              <!-- <div class="fill shadow-container">
                 <div style="width: 1000px;zoom: 0.284;font-size: 3em;margin:0.25em">
                   <el-calendar v-model="calendar">
                     <template #header="{ date }">
@@ -16,34 +16,29 @@
                     </template>
                   </el-calendar>
                 </div>
-              </div>
+              </div> -->
+              <Card mode="mask" border="16px" radius="16px" :cover="card.cover" v-for="card in cards">
+                <Profile :blogger="card.blogger"></Profile>
+              </Card>
             </template>
           </StickyArea>
         </template>
-        <template #right="{ posters }">
+        <template #right="{ submitters }">
           <StickyArea>
             <template #normal>
-              <div class="fill shadow-container" v-for="card in cards">
-                <Card :card="card" />
-              </div>
             </template>
             <template #sticky>
-              <div class="fill shadow-container" style="margin-bottom: 8px;">
+              <Card border="16px" radius="16px">
                 <Swiper speed="2000" width="292px" :pictures="pictures" />
-              </div>
+              </Card>
               <p style="color: gray;margin-left: 0.75em;margin-bottom: 0.5em;">提交者名单</p>
               <ul style="margin: 0.5em 0;">
-                <li v-for="time, poster of posters.users"
-                  :class="posters.server - time < 12 ? 'online' : posters.server - time < 60 ? 'wait' : 'offline'">
-                  <span v-if="posters.server - time < 60">
-                    {{ get_name(poster) + (posters.server - time)  + ' 秒前'}}
-                  </span>
-                  <span v-else>
-                    {{ get_name(poster) + '很久之前'}}
-                  </span>
+                <li v-for="time, name of submitters.users" :class="{ online: submitters.server - time < 12, wait: submitters.server - time < 60 }">
+                  <span v-if="submitters.server - time < 60">{{ `${name} ${submitters.server - time} 秒前`}}</span>
+                  <span v-else>{{ `${name} 很久之前` }}</span>
                 </li>
               </ul>
-              <a href="https://github.com/Drelf2018/weibo-poster" target="_blank" style="color: gray;">
+              <a href="https://github.com/Drelf2018/submitter" target="_blank" style="color: gray;">
                 <p style="font-size: 14px;margin-top:0.5em;text-align: right;">如何成为提交者</p>
               </a>
             </template>
@@ -64,21 +59,22 @@ import iPhone from '../components/iPhone.vue'
 import Swiper from '../components/Swiper.vue'
 import StickyArea from '../components/StickyArea.vue'
 
-import { Theme, userInfo, Picture } from '../components/tool'
+import { Theme, Picture } from '../components/tool'
 
 import { ref } from 'vue'
 
 import axios from 'axios'
 
-import { get_room_info, get_video_pic, get_user_name } from '../aliyun'
+import { get_room_info, get_video_pic } from '../aliyun'
+import { CardModel2, NewBlogger, get_weibo_index } from '../components/api'
 
 // 主题
 const theme = ref(new Theme)
 // 日历
 const calendar = ref(new Date())
 // 右侧卡片和画框
-const cards = ref([])
-const pictures = ref([])
+const cards = ref<Array<CardModel2>>([])
+const pictures = ref<Array<Picture>>([])
 
 // 取消系统自带滚动条
 document.body.style.overflow = "hidden"
@@ -98,25 +94,46 @@ TaskWaitAll([
   "BV1vJ411B7ng", "BV1n3411Y7fR", "BV1d34y1D7Vk", "BV1wT4y1r7g6", "BV1924y1R76y", "BV1JA4y1d7Bb",
   "BV1yU4y1W7Y2", "BV1tU4y1R7qu", "BV1yf4y137XH", "BV16D4y177Ef", "BV1DK4y1g7zE", "BV19K4y1p7Zh"
 ]).then(result => {
+  result.push(result[0])
   pictures.value = result
-  pictures.value.push(pictures.value[0])
 })
 
 // 卡片
 get_room_info(21452505).then(data => {
-  let info: userInfo = {
-    cover_href: `https://live.bilibili.com/${data.room_info.room_id}`,
-    cover_url: data.room_info.cover.replace("http://", "https://"),
-    face_href: `https://space.bilibili.com/${data.room_info.uid}`,
-    face_url: data.anchor_info.base_info.face,
-    pendant: "",
-    pendant_color: "rgb(251, 114, 153)",
-    title: data.anchor_info.base_info.uname,
-    title_color: "rgb(251, 114, 153)",
-    subtitle: `粉丝 ${data.anchor_info.relation_info.attention} - 舰长 ${data.guard_info.count}`
-  }
-  cards.value.push(info)
+  cards.value.push({
+    blogger: NewBlogger({
+      platform: "bilibili",
+      uid: data.room_info.uid,
+      name: data.anchor_info.base_info.uname,
+      description: `粉丝 ${data.anchor_info.relation_info.attention} | 舰长 ${data.guard_info.count}`,
+      face: {link: data.anchor_info.base_info.face},
+      pendant: {link:""},
+    }),
+    cover: {
+      url: `https://live.bilibili.com/${data.room_info.room_id}`,
+      link: data.room_info.cover.replace("http://", "https://"),
+    }
+  })
 })
+
+get_weibo_index("7198559139").then(resp => {
+  let u = resp.data.data.userInfo
+  cards.value.push({
+    blogger: NewBlogger({
+      platform: "weibo",
+      uid: u.id,
+      name: u.screen_name,
+      description: `粉丝 ${u.followers_count} | 关注 ${u.follow_count}`,
+      face: {link: `https://gin.nana7mi.link/fetch/${u.avatar_hd}`},
+      pendant: {link:""},
+    }),
+    cover: {
+      url: u.profile_url,
+      link: `https://gin.nana7mi.link/fetch/https://wx1.sinaimg.cn/mw2000/007Raq4zly1gzii5ay1k1j30u00u0ah2.jpg`,
+    }
+  })
+})
+
 
 function TaskWaitAll(args: Array<string>) {
   function getPicture(bv: string) {
@@ -132,18 +149,7 @@ function TaskWaitAll(args: Array<string>) {
   }
   let taskall = []
   for (let arg of args) taskall.push(getPicture(arg))
-  return Promise.all(taskall)
-}
-
-// 获取b站名字
-const uid2name = {}
-function get_name(uid: number | string) {
-  if (uid == 0 || uid == "") return ""
-  if (!uid2name[uid]) {
-    uid2name[uid] = uid
-    get_user_name(uid, 86400).then( data => uid2name[uid] = data + " ").catch(console.log)
-  }
-  return uid2name[uid]
+  return Promise.all<Picture>(taskall)
 }
 </script>
 

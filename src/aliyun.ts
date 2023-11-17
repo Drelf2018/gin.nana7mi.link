@@ -4,11 +4,15 @@ const aliyun = axios.create({
   baseURL: 'https://aliyun.nana7mi.link/',
 })
 
-export default aliyun
+interface BiliData<T = any> {
+  code: number
+  error?: string
+  data: T
+}
 
-export async function request(url: string, max_age: number = -1) {
-  let res = await aliyun.get(url, { params: { max_age: max_age } })
-  if(res.data.code != 0) throw res.data.data
+export async function request<T = any>(url: string, max_age: number = -1) {
+  let res = await aliyun.get<BiliData<T>>(url, { params: { max_age: max_age } })
+  if(res.data.code != 0) throw res.data.error
   return res.data.data
 }
 
@@ -16,12 +20,16 @@ export async function get_user_info(uid: string | number, max_age: number = -1) 
   return await request(`/user.User(${uid}).get_user_info()`, max_age)
 }
 
+export async function get_user_photo(uid: string | number, max_age: number = -1) {
+  return await request<string>(`/user.User(${uid}).get_user_info().live_room.cover`, max_age)
+}
+
 export async function get_user_face(uid: string | number, max_age: number = -1) {
   return await request(`/user.User(${uid}).get_user_info().face`, max_age)
 }
 
 export async function get_user_name(uid: string | number, max_age: number = -1) {
-  return await request(`/user.User(${uid}).get_user_info().name`, max_age)
+  return await request<string>(`/user.User(${uid}).get_user_info().name`, max_age)
 }
 
 export async function get_room_info(roomid: string | number, max_age: number = -1) {
