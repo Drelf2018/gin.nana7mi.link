@@ -1,15 +1,15 @@
 <template>
-  <div class="nav-container" :style="'--height: ' + height">
-    <div class="nav-picture" :style="`background-image: url(${src})`"></div>
-    <div :class="[isCovered === true ? 'nav-cover' : 'nav-show', 'nav-header']">
+  <div class="nav-container" :style="{height: height}">
+    <div class="nav-picture" :style="{backgroundImage: `url(${src})`}"></div>
+    <div :class="[isCovered ? 'nav-cover' : 'nav-show', 'nav-header']">
       <div class="nav-controler" @click="theme.modifyTheme">
-        <ion-icon v-if="theme.theme == 'light'" name="sunny"></ion-icon>
+        <ion-icon v-if="theme.isLight()" name="sunny"></ion-icon>
         <ion-icon v-else name="moon"></ion-icon>
       </div>
-      <input v-model="search" type="text" placeholder="支持模糊搜索动态" @input="e => emit('search', search)">
-      <Face id="face" :login="blogger.uid != ''" :blogger="blogger" style="font-size: 34px" />
-      <div id="info" @mouseenter="info" @mouseleave="info">
-        <Card v-if="theme.isPC" mode="shadow" border="16px" radius="16px" :cover="blogger.photo">
+      <input v-model="search" type="text" placeholder="支持模糊搜索动态" @input="() => emit('search', search)">
+      <Face id="face" :login="blogger.uid != ''" :enter="hover" :blogger="blogger" style="font-size: 34px" />
+      <div id="info" @mouseenter="enter" @mouseleave="() => hover = false">
+        <Card v-if="theme.isPC" mode="shadow" border="16px" radius="16px" :cover="blogger.photo" style="opacity: 1;">
           <div style="padding: 8px;">
             <slot v-if="blogger.uid" name="login"></slot>
             <slot v-else name="logout"></slot>
@@ -21,16 +21,16 @@
 </template>
 
 <script setup lang="ts">
-import { ref, PropType, onMounted, computed } from 'vue'
+import { ref, PropType, onMounted } from 'vue'
 import { Theme } from './tool'
-import { Attachment, Blogger } from './api'
+import { Blogger } from './api'
 
 import Card from './Card.vue'
-import vueConfig from 'vue.config'
+import Face from './Face.vue'
 
 const emit = defineEmits(['search'])
 
-const props = defineProps({
+defineProps({
   src: String,
   height: String,
   isCovered: Boolean,
@@ -39,21 +39,10 @@ const props = defineProps({
 })
 
 const search = ref("")
+const hover = ref(false)
 
-function info(evt) {
-  switch(evt.type) {
-    case "mouseenter":
-      let style = window.getComputedStyle(evt.target)
-      if (style.opacity != "0") {
-        evt.target.classList.add(["show-info"])
-        document.getElementById("face").classList.add("show-face")
-      }
-      break
-    case "mouseleave":
-      evt.target.classList.remove(["show-info"])
-      document.getElementById("face").classList.remove("show-face")
-      break
-  }
+function enter(evt: MouseEvent) {
+  hover.value = window.getComputedStyle(evt.target as Element).opacity != "0"
 }
 
 onMounted(() => {
@@ -74,33 +63,23 @@ onMounted(() => {
   overflow: hidden;
 }
 
-.show-info {
-  top: 72px !important;
-  opacity: 1 !important;
-  transition: all 0.25s !important;
-}
-
 #face {
   z-index: 107;
   transition: all 0.35s ease 0.25s;
 
-  &:hover + #info {
-    top: 72px;
-    opacity: 1;
-    transition: all 0.25s;
+  &:hover, &[enter=true]{
+    &[login=true]{
+      transform: translateY(35%);
+      transition: all 0.25s;
+      scale: 2;
+    }
+
+    & + #info {
+      top: 72px;
+      opacity: 1;
+      transition: all 0.25s;
+    }
   }
-}
-
-#face[login=true]:hover {
-  transform: translateY(35%);
-  transition: all 0.25s;
-  scale: 2;
-}
-
-.show-face[login=true] {
-  transform: translateY(35%);
-  transition: all 0.25s;
-  scale: 2;
 }
 
 @each $status in show, cover {
@@ -148,7 +127,6 @@ onMounted(() => {
 
 .nav-container {
   text-align: center;
-  height: var(--height);
 
   .mobile & {
     height: 64px !important;
@@ -171,6 +149,7 @@ onMounted(() => {
 .nav-picture {
   // filter: contrast(90%);
   // position: absolute;
+
   .mobile & {
     background-image: none !important;
   }
@@ -179,7 +158,7 @@ onMounted(() => {
   z-index: -2;
   top: 0;
   width: 100%;
-  height: var(--height);
+  height: 100%;
   background-repeat: no-repeat;
   background-position: center 0%;
   background-size: cover;

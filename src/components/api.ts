@@ -52,6 +52,19 @@ export async function register(auth: string) {
   return await request("/register", "GET", auth)
 }
 
+export async function posts(begin: number = null, end: number = null, test: boolean = false) {
+  let d: data = null
+  if(test) {
+    d = await request<data>("/posts?test")
+  } else {
+    d = await request<data>("/posts", "GET", "", { 'begin': begin, 'end': end })
+  }
+  for (let i = 0; i < d.posts.length; i++) {
+    d.posts[i] = NewPost(d.posts[i])
+  }
+  return d
+}
+
 export interface online {
   server: number
   users: { [key: string]: number }
@@ -109,21 +122,6 @@ export class Blogger {
   async get_photo() {
     this.photo = {link: await get_user_photo(this.uid, 86400)}
   }
-}
-
-export interface CardModel2 {
-  cover: Attachment
-  blogger: Blogger
-}
-
-export interface CardModel {
-  cover2?: Attachment
-  blogger: Blogger
-  cover?: string
-  href?: string
-  title?: string
-  color?: string
-  subtitle?: string
 }
 
 export class PostModel {
@@ -197,12 +195,4 @@ export function NewPost(post: Object) {
   p.blogger = NewBlogger(p.blogger)
   p.repost = NewPost(p.repost)
   return p
-}
-
-export async function posts(begin: number = null, end: number = null) {
-  let d = await request<data>("/posts", "GET", "", { 'begin': begin, 'end': end })
-  for (let i = 0; i < d.posts.length; i++) {
-    d.posts[i] = NewPost(d.posts[i])
-  }
-  return d
 }

@@ -28,7 +28,7 @@ defineProps({ blogger: Object as PropType<Blogger> })
   position: relative;
 
   div {
-    font-size: 0.48em;
+    font-size: 0.4em;
   }
 
   p {

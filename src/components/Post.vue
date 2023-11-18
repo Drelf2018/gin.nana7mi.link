@@ -27,22 +27,7 @@ import { PropType } from 'vue';
 import Card from './Card.vue'
 import Comments from './Comments.vue'
 
-// defineProps({ post: Object as PropType<PostModel> })
-const props = defineProps({ post: Object as PropType<PostModel> })
-handler(props.post)
-
-function handler(post: PostModel) {
-  post.blogger.face.link = replaceUrl(post.blogger.face.link)
-  post.blogger.pendant.link = replaceUrl(post.blogger.pendant.link)
-  post.attachments.forEach(a => {
-    a.link = replaceUrl(a.link)  
-  })
-}
-
-function replaceUrl(url: string) {
-  if(url == "") return ""
-  return "https://gin.nana7mi.link" + url
-}
+defineProps({ post: Object as PropType<PostModel> })
 </script>
 
 <style lang="scss" scoped>

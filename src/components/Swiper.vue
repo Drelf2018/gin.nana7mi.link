@@ -4,7 +4,7 @@
       <div :class="[keepMove ^ (selected == 1 ? 1 : 0) ? 'swiper-scroll-back' : 'swiper-scroll-move', 'swiper-scroll']"
         :style="`left: ${(selected - 1) * -100}%`">
         <a v-for="pic in pictures" :href="pic.link" target="_blank">
-          <div class="blur-image" :style="`width: ${width};background-image: url(${pic.url});`"></div>
+          <div class="blur-image" :style="{width: width, backgroundImage: `url(${pic.url})`}"></div>
           <img :src="pic.url" />
         </a>
       </div>
@@ -19,13 +19,14 @@
 </template>
 
 <script setup lang="ts">
-import { throttle, Picture } from './tool'
+import { Attachment } from './api'
+import { throttle } from './tool'
 import { ref, onMounted } from 'vue'
 
 const props = defineProps({
   speed: String,
   width: String,
-  pictures: Array<Picture>
+  pictures: Array<Attachment>
 })
 
 const keepMove = ref(0)

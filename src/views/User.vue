@@ -23,7 +23,7 @@
       <el-divider style="margin: 0" />
       <el-container>
         <el-aside width="350px" style="padding: 12px 4px 0;margin: 0 16px;">
-          <Post :opost="post" v-for="post in PastPosts"></Post>
+          <Post :post="post" v-for="post in PastPosts"></Post>
         </el-aside>
         <el-main style="padding: 20px 0;">
           <Code ref="code" class="code"></Code>
@@ -100,54 +100,55 @@ jobs:
 `
 // 获取博文函数
 const PastPosts = ref([])
+posts(0, 0, true).then(p => PastPosts.value = p.posts)
 // 获取一定数量的初始博文
-GetPastPost()
-async function GetPastPost() {
-  let res = await posts(1676917807, 1676919151)
-  if (res.data.code == 0) {
-    if (res.data.data.length != 0) {
-      let tp = res.data.data.reverse()
-      let key2index = {}
-      for (let i = 0; i < tp.length; i++) {
-        tp[i].key = tp[i].type + tp[i].mid
-        key2index[tp[i].key] = i
-      }
-      for (let i = 0; i < tp.length; i++) {
-        if (tp[i].type == "weiboComment") {
-          let j = key2index[tp[i].attachment[0]]
-          if (j) tp[j].attachment.push(tp[i])
-        }
-      }
-      PastPosts.value = PastPosts.value.concat(tp.filter(post => post.type + post.uid == "weibo7198559139"))
-      let post = PastPosts.value[0]
-      let picUrls = ""
-      for (let i in post.picUrls) {
-        picUrls += "\n    - " + post.picUrls[i]
-      }
-      PostInfo = `# 仓库 https://github.com/Drelf2018/weibo-webhook/blob/main/network.go#L113-L135
-# 接口 https://api.nana7mi.link/post?beginTs=1676917807&endTs=1676919151
-# 以下为 post 格式 不必修改 如需使用值请用 {arg} 形式
-post:
-  mid: ${post.mid}
-  time: ${post.time}
-  text: ${post.text}
-  type: ${post.type}
-  source: ${post.source}
-  uid: ${post.uid}
-  name: ${post.name}
-  face: ${post.face}
-  pendant: ${post.pendant}
-  description: ${post.description}
-  follower: ${post.follower}
-  following: ${post.following}
-  picUrls: ${picUrls}
-  repost: ${post.repost}
-`
-    } else {
-      await GetPastPost()
-    }
-  }
-}
+// GetPastPost()
+// async function GetPastPost() {
+//   let res = await posts(1676917807, 1676919151)
+//   if (res.data.code == 0) {
+//     if (res.data.data.length != 0) {
+//       let tp = res.data.data.reverse()
+//       let key2index = {}
+//       for (let i = 0; i < tp.length; i++) {
+//         tp[i].key = tp[i].type + tp[i].mid
+//         key2index[tp[i].key] = i
+//       }
+//       for (let i = 0; i < tp.length; i++) {
+//         if (tp[i].type == "weiboComment") {
+//           let j = key2index[tp[i].attachment[0]]
+//           if (j) tp[j].attachment.push(tp[i])
+//         }
+//       }
+//       PastPosts.value = PastPosts.value.concat(tp.filter(post => post.type + post.uid == "weibo7198559139"))
+//       let post = PastPosts.value[0]
+//       let picUrls = ""
+//       for (let i in post.picUrls) {
+//         picUrls += "\n    - " + post.picUrls[i]
+//       }
+//       PostInfo = `# 仓库 https://github.com/Drelf2018/weibo-webhook/blob/main/network.go#L113-L135
+// # 接口 https://api.nana7mi.link/post?beginTs=1676917807&endTs=1676919151
+// # 以下为 post 格式 不必修改 如需使用值请用 {arg} 形式
+// post:
+//   mid: ${post.mid}
+//   time: ${post.time}
+//   text: ${post.text}
+//   type: ${post.type}
+//   source: ${post.source}
+//   uid: ${post.uid}
+//   name: ${post.name}
+//   face: ${post.face}
+//   pendant: ${post.pendant}
+//   description: ${post.description}
+//   follower: ${post.follower}
+//   following: ${post.following}
+//   picUrls: ${picUrls}
+//   repost: ${post.repost}
+// `
+//     } else {
+//       await GetPastPost()
+//     }
+//   }
+// }
 
 function onBack() {
   window.location = '/'

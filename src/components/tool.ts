@@ -1,5 +1,3 @@
-import { PostModel, Blogger } from "./api";
-
 export function throttle(fn: Function, delay = 500) {
   var flag = new Date().getTime();
   return function (...args) {
@@ -78,9 +76,8 @@ export class Theme {
     localStorage.setItem("theme", this.theme)
     this.setBackgroundColor()
   }
-}
 
-export interface Picture {
-  link: string
-  url: string
+  isLight(): boolean {
+    return this.theme == 'light'
+  }
 }

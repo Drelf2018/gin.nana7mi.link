@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { Attachment } from './components/api'
 
 const aliyun = axios.create({
   baseURL: 'https://aliyun.nana7mi.link/',
@@ -46,6 +47,20 @@ export async function get_download_url(bvid: string, max_age: number = -1) {
 
 export async function get_video_pic(bvid: string, max_age: number = -1) {
   return await request(`/video.Video(bvid=${bvid}).get_info().pic`, max_age)
+}
+
+export async function get_video_cover(bvid: string): Promise<Attachment> {
+  let url = await get_video_pic(bvid, 2592000)
+  return {
+    link: `https://www.bilibili.com/video/${bvid}`,
+    url: url.replace("http://", "https://")
+  }
+}
+
+export function get_all_video_cover(args: Array<string>) {
+  let tasks: Array<Promise<Attachment>> = []
+  for(let arg of args) tasks.push(get_video_cover(arg))
+  return Promise.all(tasks)
 }
 
 export interface Comment {
