@@ -1,14 +1,14 @@
 <template>
-  <Card mode="mask" border="16px" radius="16px">
-    <a :href="post.get_post_url()" style="color: inherit" target="_blank"><ion-icon name="arrow-redo-outline" class="goto"></ion-icon></a>
-    <ion-icon name="alert-circle-outline" class="goto" @click="post.notice"></ion-icon>
-    <Profile :blogger="post.blogger"></Profile>
-    <p class="text" v-html="post.text"></p>
-    <div :style="{'padding': '0px 8px', '--len': Math.min(post.attachments.length, 3)}">
-      <img class="attachments" :src="a.link" v-for="a in post.attachments">
+  <Card2 radius="16px" style="padding: 0.8em;">
+    <!-- <a :href="post.get_post_url()" style="color: inherit" target="_blank"><ion-icon name="arrow-redo-outline" class="goto"></ion-icon></a> -->
+    <!-- <ion-icon name="alert-circle-outline" class="goto" @click="post.notice"></ion-icon> -->
+    <Profile :blog="blog" space="0.3em" style="font-size: 1.3333333em;" />
+    <p class="text" v-html="blog.text"></p>
+    <p class="date">{{ Format(new Date(blog.time), "yy/MM/dd hh:mm:ss") }} {{ blog.source }}</p>
+    <div :style="{ '--len': Math.min(Math.ceil(Math.sqrt(blog.assets?.length)), 3) }">
+      <img v-for="url in blog.assets" class="attachments" :src="replace_url(url)">
     </div>
-    <Post v-if="post.repost" :post="post.repost" style="margin: 8px;" />
-    <p class="date">{{ post.get_format_time() }} 来自 {{ post.source }}</p>
+    <Post v-if="blog.reply" :blog="blog.reply" style="margin: 0.8em 0px 0px;" />
     <!-- :style="[post.comments.length != 0 ? '' : 'margin-bottom: 0']"
       <Comments 
         :key="com.mid"
@@ -18,16 +18,20 @@
         v-for="com, i in post.comments"
       />
     -->
-  </Card>
+  </Card2>
 </template>
 
 <script setup lang="ts">
-import { PostModel } from "./api";
 import { PropType } from 'vue';
-import Card from './Card.vue'
-import Comments from './Comments.vue'
+import { Blog } from './model'
+import { Format, get_file_MIME_type } from './tool'
 
-defineProps({ post: Object as PropType<PostModel> })
+import Card2 from './Card2.vue'
+import Comments from './Comments.vue'
+import Profile from './Profile.vue';
+import { replace_url } from './backend';
+
+defineProps({ blog: Object as PropType<Blog> })
 </script>
 
 <style lang="scss" scoped>
@@ -54,14 +58,12 @@ defineProps({ post: Object as PropType<PostModel> })
 }
 
 .goto:hover {
-  color: rgb(0,161,214);
-  background-color: rgba(0,0,0,0.1);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  color: rgb(0, 161, 214);
+  background-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.text {
-  margin: 0 8px;
-}
+.text {}
 
 .attachments {
   width: calc(100% / var(--len) - 2px);
@@ -72,8 +74,7 @@ defineProps({ post: Object as PropType<PostModel> })
 .date {
   color: grey;
   text-align: right;
-  font-size: 12px;
-  // margin-top: 8px;
-  margin-right: 16px;
+  font-size: 0.6666em;
+  margin: 0;
 }
 </style>

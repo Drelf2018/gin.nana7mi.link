@@ -4,7 +4,7 @@ import { Attachment } from './components/api'
 const aliyun = axios.create({
   baseURL: 'https://aliyun.nana7mi.link/',
 })
-
+// /forward/https/api.bilibili.com/x/web-interface/card?mid=2
 interface BiliData<T = any> {
   code: number
   error?: string
@@ -13,7 +13,7 @@ interface BiliData<T = any> {
 
 export async function request<T = any>(url: string, max_age: number = -1) {
   let res = await aliyun.get<BiliData<T>>(url, { params: { max_age: max_age } })
-  if(res.data.code != 0) throw res.data.error
+  if (res.data.code != 0) throw res.data.error
   return res.data.data
 }
 
@@ -59,7 +59,7 @@ export async function get_video_cover(bvid: string): Promise<Attachment> {
 
 export function get_all_video_cover(args: Array<string>) {
   let tasks: Array<Promise<Attachment>> = []
-  for(let arg of args) tasks.push(get_video_cover(arg))
+  for (let arg of args) tasks.push(get_video_cover(arg))
   return Promise.all(tasks)
 }
 

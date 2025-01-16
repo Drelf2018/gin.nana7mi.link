@@ -34,6 +34,32 @@ export function Format(date, fmt) {
   return fmt;
 }
 
+// 根据文件扩展名判断数据类型
+export function get_file_MIME_type(url: string) {
+  switch (url.split('.').pop().toLowerCase()) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'gif':
+      return 'image/gif';
+    case 'json':
+      return 'application/json';
+    case 'js':
+      return 'application/javascript';
+    case 'css':
+      return 'text/css';
+    case 'html':
+      return 'text/html';
+    case 'txt':
+      return 'text/plain';
+    // 可以继续添加更多的文件类型和MIME类型
+    default:
+      return 'unknown';
+  }
+}
+
 export class Theme {
   dark: string = "rgba(30, 30, 30, 1)"
   light: string = "rgba(246, 248, 250, 0.5)"

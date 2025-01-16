@@ -1,19 +1,20 @@
 <template>
-  <a v-if="blogger.face.link" :href="blogger.get_face_href()" target="_blank">
+  <a v-if="blog.avatar" :href="blog.avatar" target="_blank">
     <div class="face">
-      <img id="pendant" :src="blogger.pendant.link">
-      <img id="profile" :src="blogger.face.link" :url="blogger.pendant.link != ''" :style="{borderColor: blogger.get_pendant_color()}">
+      <img id="avatar" :src="replace_url(blog.avatar)">
     </div>
   </a>
-  <a v-else href="javascript:;" class="login" @click="login"><div>登录</div></a>
+  <a v-else href="javascript:;" class="login" @click="login">
+    <div>登录</div>
+  </a>
 </template>
 
 <script setup lang="ts">
 import { PropType } from 'vue'
-import { Blogger } from './api'
+import { Blog } from './model'
+import { replace_url } from './backend'
 
-const props = defineProps({ blogger: Object as PropType<Blogger> })
-
+defineProps({ blog: Object as PropType<Blog> })
 
 function login() {
   let form = document.getElementById("hidden-login-form")
@@ -24,41 +25,21 @@ function login() {
 
 <style lang="scss" scoped>
 .face {
-  // width: var(--size);
-  // height: var(--size);
   width: 1em;
   height: 1em;
   position: relative;
   background-size: contain;
 
-  #pendant {
-    // --alpha: 1.6;
-    // height: calc(var(--size) * var(--alpha));
-    height: 1.75em;
-    position: relative;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  #profile {
-    position: absolute;
-    // height: var(--size);
+  #avatar {
     width: 1em;
     height: 1em;
-    object-fit: cover;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: -1;
-    border-radius: 50%;
-    border-color: rgb(0, 161, 214);
-  }
-  
-  #profile[url=false]  {
-    border-style: solid;
-    // border-width: calc(0.05 * var(--size));
-    border-width: 0.05em;
+    border-radius: 25%;
+
+    #app[data-theme=light] & {
+      box-shadow: 0 3px 1px -2px rgb(0 0 0 / 12%),
+        0 2px 2px 0 rgb(0 0 0 / 14%),
+        0 1px 5px 0 rgb(0 0 0 / 20%);
+    }
   }
 }
 

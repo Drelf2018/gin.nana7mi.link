@@ -2,7 +2,8 @@ import axios from 'axios'
 import { Format } from './tool'
 import { get_user_photo } from '../aliyun'
 
-const gin = axios.create({ baseURL: 'https://gin.nana7mi.link/' })
+const gin_old = axios.create({ baseURL: 'https://gin.nana7mi.link/' })
+// const gin = axios.create({ baseURL: 'https://blog.nana7mi.link/' })
 
 interface GinData<T = any> {
   code: number
@@ -11,7 +12,7 @@ interface GinData<T = any> {
 }
 
 export async function request<T = any>(url: string, method: string = "GET", auth: string = "", params: any = {}, data: any = {}) {
-  let resp = await gin.request<GinData<T>>({
+  let resp = await gin_old.request<GinData<T>>({
     method: method,
     url: url,
     headers: { "Authorization": auth },
@@ -52,23 +53,7 @@ export async function register(auth: string) {
   return await request("/register", "GET", auth)
 }
 
-export async function posts(begin: number = null, end: number = null, test: boolean = false) {
-  let d: data = null
-  if(test) {
-    d = await request<data>("/posts?test")
-  } else {
-    d = await request<data>("/posts", "GET", "", { 'begin': begin, 'end': end })
-  }
-  for (let i = 0; i < d.posts.length; i++) {
-    d.posts[i] = NewPost(d.posts[i])
-  }
-  return d
-}
 
-export interface online {
-  server: number
-  users: { [key: string]: number }
-}
 
 export interface Submitter {
   uid: string
@@ -120,7 +105,7 @@ export class Blogger {
   }
 
   async get_photo() {
-    this.photo = {link: await get_user_photo(this.uid, 86400)}
+    this.photo = { link: await get_user_photo(this.uid, 86400) }
   }
 }
 
@@ -168,7 +153,7 @@ export class PostModel {
       let notice = new Notification(`${this.blogger.name} 发布了新动态！`, {
         body: this.text.replace(/<[^>]*>/g, ''),
         icon: "/favicon.ico",
-        image: this.attachments[0]?.link,
+        // image: this.attachments[0]?.link,
         data: "https://nana7mi.link"
       })
       let url = this.get_post_url()
@@ -180,17 +165,17 @@ export class PostModel {
   }
 }
 
-export interface data {
-  online: online
-  posts: Array<PostModel>
-}
+// export interface data {
+//   online: online
+//   posts: Array<PostModel>
+// }
 
 export function NewBlogger(blogger: Object) {
   return Object.assign(new Blogger(), blogger)
 }
 
 export function NewPost(post: Object) {
-  if(!post) return null
+  if (!post) return null
   let p = Object.assign(new PostModel(), post)
   p.blogger = NewBlogger(p.blogger)
   p.repost = NewPost(p.repost)

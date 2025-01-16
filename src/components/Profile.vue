@@ -1,38 +1,36 @@
 <template>
   <div class="show">
-    <Face :blogger="blogger" style="margin: 0.24em;" />
-    <span>
-      <div>
-        <span :style="{ color: blogger.get_pendant_color() }">{{ blogger.name }}</span>
-      </div>
-      <p>{{ blogger.description }}</p>
-    </span>
+    <Face :blog="blog" style="font-size: 2.5em;" />
+    <div :style="{ marginLeft: space }">
+      <span>{{ blog.name }}</span>
+      <p>{{ blog.description }}</p>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { PropType } from 'vue'
-import { Blogger } from "./api";
+import { Blog } from './model'
 
 import Face from './Face.vue'
+import Card2 from './Card2.vue'
 
-defineProps({ blogger: Object as PropType<Blogger> })
+defineProps({
+  blog: Object as PropType<Blog>,
+  space: String,
+})
 </script>
 
 <style lang="scss" scoped>
 .show {
-  font-size: 50px;
+  // font-size: 20px;
   display: flex;
   align-items: center;
   z-index: 2;
   position: relative;
 
-  div {
-    font-size: 0.4em;
-  }
-
   p {
-    font-size: 0.28em;
+    font-size: 0.7em;
     margin: 0;
     color: grey;
   }

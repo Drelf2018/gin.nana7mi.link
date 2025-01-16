@@ -1,17 +1,18 @@
 <template>
-  <div class="nav-container" :style="{height: height}">
-    <div class="nav-picture" :style="{backgroundImage: `url(${src})`}"></div>
+  <div class="nav-container" :style="{ height: height }">
+    <div class="nav-picture" :style="{ backgroundImage: `url(${src})` }"></div>
     <div :class="[isCovered ? 'nav-cover' : 'nav-show', 'nav-header']">
       <div class="nav-controler" @click="theme.modifyTheme">
         <ion-icon v-if="theme.isLight()" name="sunny"></ion-icon>
         <ion-icon v-else name="moon"></ion-icon>
       </div>
       <input v-model="search" type="text" placeholder="支持模糊搜索动态" @input="() => emit('search', search)">
-      <Face id="face" :login="blogger.uid != ''" :enter="hover" :blogger="blogger" style="font-size: 34px" />
+      <Face id="face" :login="blog.uid != ''" :enter="hover" :blog="blog" style="font-size: 34px" />
       <div id="info" @mouseenter="enter" @mouseleave="() => hover = false">
-        <Card v-if="theme.isPC" mode="shadow" border="16px" radius="16px" :cover="blogger.photo" style="opacity: 1;">
+        <Card v-if="theme.isPC" mode="shadow" border="16px" radius="16px" style="opacity: 1;">
+          <!-- :cover="blog.photo"  -->
           <div style="padding: 8px;">
-            <slot v-if="blogger.uid" name="login"></slot>
+            <slot v-if="blog.uid" name="login"></slot>
             <slot v-else name="logout"></slot>
           </div>
         </Card>
@@ -23,7 +24,7 @@
 <script setup lang="ts">
 import { ref, PropType, onMounted } from 'vue'
 import { Theme } from './tool'
-import { Blogger } from './api'
+import { Blog } from './model'
 
 import Card from './Card.vue'
 import Face from './Face.vue'
@@ -34,7 +35,7 @@ defineProps({
   src: String,
   height: String,
   isCovered: Boolean,
-  blogger: Object as PropType<Blogger>,
+  blog: Object as PropType<Blog>,
   theme: Object as PropType<Theme>
 })
 
@@ -67,14 +68,15 @@ onMounted(() => {
   z-index: 107;
   transition: all 0.35s ease 0.25s;
 
-  &:hover, &[enter=true]{
-    &[login=true]{
+  &:hover,
+  &[enter=true] {
+    &[login=true] {
       transform: translateY(35%);
       transition: all 0.25s;
       scale: 2;
     }
 
-    & + #info {
+    &+#info {
       top: 72px;
       opacity: 1;
       transition: all 0.25s;
@@ -84,15 +86,16 @@ onMounted(() => {
 
 @each $status in show, cover {
   .nav-#{$status} {
-    @if $status == cover {
+    @if $status ==cover {
       text-shadow: none;
       transition: all 0.2s;
 
-      @include themeify{
+      @include themeify {
         background-color: themed('nav-cover-color');
         box-shadow: themed('nav-cover-shadow');
       }
     }
+
     .nav-controler {
       width: 34px;
       height: 34px;
@@ -105,19 +108,19 @@ onMounted(() => {
       }
 
       [aria-label=sunny] {
-        color: rgb(255,130,0);
+        color: rgb(255, 130, 0);
       }
 
       [aria-label=moon] {
-        color: rgb(255,228,53);
+        color: rgb(255, 228, 53);
       }
 
-      @include themeify{
+      @include themeify {
         background-color: themed('nav-#{$status}');
       }
 
       &:hover {
-        @include themeify{
+        @include themeify {
           background-color: themed('nav-#{$status}-hover');
         }
       }
@@ -164,7 +167,7 @@ onMounted(() => {
   background-size: cover;
   transition: opacity 0.2s;
 
-  @include themeify{
+  @include themeify {
     opacity: themed('fill');
   }
 }
@@ -183,14 +186,17 @@ input {
   transition: all 0.2s;
   opacity: 0.65;
 
-  &:hover { opacity: 0.85; }
+  &:hover {
+    opacity: 0.85;
+  }
+
   &:focus {
     border-color: #86b7fe;
     outline: 0;
     box-shadow: 0 0 0 0.25rem rgb(13 110 253 / 25%);
     opacity: 1;
 
-    @include themeify{
+    @include themeify {
       box-shadow: themed('input-focus');
     }
   }

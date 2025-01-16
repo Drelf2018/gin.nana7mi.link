@@ -23,7 +23,7 @@
       <el-divider style="margin: 0" />
       <el-container>
         <el-aside width="350px" style="padding: 12px 4px 0;margin: 0 16px;">
-          <Post :post="post" v-for="post in PastPosts"></Post>
+          <Post :blog="post" v-for="post in PastPosts"></Post>
         </el-aside>
         <el-main style="padding: 20px 0;">
           <Code ref="code" class="code"></Code>
@@ -43,7 +43,7 @@
     </el-container>
   </div>
 </template>
- 
+
 <script setup>
 import axios from 'axios'
 import Code from '../components/Code.vue'
@@ -193,10 +193,10 @@ async function login(uid, token) {
 
 // 获取 watch
 async function getWatch(url) {
-  if(url) axios.get(`https://api.nana7mi.link/yml${url}`).then(
+  if (url) axios.get(`https://api.nana7mi.link/yml${url}`).then(
     res => {
       let yml = jsYaml.load(res.data)
-      if(yml) {
+      if (yml) {
         code.value.changeEditor(res.data + PostInfo)
       } else {
         code.value.changeEditor(DefaultConfig + PostInfo)
